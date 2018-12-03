@@ -106,7 +106,7 @@ couchbackup --db animaldb --log animaldb.log --resume true --output animaldb.txt
 ```
 ## Incremental backups
 
-This is a newly developed feature and is in extreme alpha stage. if you pass the `--incremental-log` flag with a full path to the incremental log file, this will keep track of the `last_seq` from Cloudant. Your backups are still written to the same `--log` file and `--output` file. Some important requirements:
+This is a newly developed feature and is in extreme alpha stage. if you pass the `--incremental-log` flag with a full path to the incremental log file, this will keep track of the `last_seq` from Cloudant. Your backups are still exclusively written to the same `--output` file. Some important notes:
 
 - If you backup multiple databases, each database must have it's own `--incremental-log` file.
 - `--mode shallow` is incompatible since it doesn't use the couchDB `_changes` endpoint.
