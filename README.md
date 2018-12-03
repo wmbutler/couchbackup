@@ -114,7 +114,7 @@ This is a newly developed feature and is in extreme alpha stage. if you pass the
 - The first time you run with the `--incremental-log` flag, we will do a full backup and append the backup log with `_0`.
 - Must use the `--output` flag instead of `STDOUT` to save the file since we need control to name it with the sequence.
 - Must use the `--log` flag since we use this to grab the `seq`. You do not need to keep the log file associated with this flag. You only need to keep the `--output` and the `--incremental-log`.
-- Subsequent backup log files will increment _1, _2, _3 as you might expect.
+- Subsequent `--log` files will increment _1, _2, _3 as you might expect.
 - Set any frequency you like. All that matters on restore is that you respect the sequence of the log files.
 - You will not require the `--incremental-log` log file for the restore since it doesn't actually store any of your data.
 - Restore operation for this incremental operation has not been built but it should be fairly easy to script the restore of each file in sequence.
