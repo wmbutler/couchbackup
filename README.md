@@ -104,6 +104,42 @@ You may also specify the name of the output file, rather than directing the back
 ```sh
 couchbackup --db animaldb --log animaldb.log --resume true --output animaldb.txt
 ```
+## Incremental backups
+
+This is a newly developed feature and is in extreme alpha stage. if you pass the `--incremental-log` flag with a full path to the incremental log file, this will keep track of the `seq` value in the `_changes` endpoint. Each time a backup succeeds this will append the `last_seq` to the incremental log file. Files are still written to the log file and the output file. Some important requirements:
+
+- If you backup multiple databases, each database must have it's own incremental log file.
+- `--mode shallow` is incompatible since it doesn't use the `_changes` endpoint.
+- If you lose the incremental log file containing the list of `seq`, you will have no choice but to start over with a full backup. This file needs to be present every time. It is automatically created for you on the first run.
+- The first time you run with the `--incremental` flag, we will do a full backup and append the filename with `_0`.
+- Must use the `--output` flag instead of `STDOUT` to save the file since we need control to name it with the sequence.
+- Subsequent log files will increment _1, _2, _3 as you might expect.
+- Set any frequency you like. All that matters on restore is that you respect the sequence of the log files.
+- You will not require the incremental log file for the restore since it doesn't actually store any of your data.
+- Restore operation for these files has not been built but it shoould be fairly easy to script the restore of each file in sequence.
+
+### Setup
+
+This isn't an NPM module yet so you will need to clone the githib repo, then:
+
+```
+git clone https://github.com/cloudant/couchbackup.git
+cd couchbackup
+npm install
+cd bin
+```
+
+### Example
+
+This is not yet avalable as an NPM so this is the correc syntax for running it if you fork the github repo.
+```
+node couchbackup.bin.js \
+--url https://user:pass@instance.cloudant.com \
+--db staging \
+--log /home/backup/staging.log \
+--output  /home/backup/staging.json \
+--incremental-log /home/backup/incremental.txt
+```
 
 ## Restore
 
