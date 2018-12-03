@@ -121,7 +121,7 @@ This is a newly developed feature and is in extreme alpha stage. if you pass the
 
 ### Setup
 
-This isn't an NPM module yet so you will need to clone the githib repo, then:
+This isn't an NPM module yet so you will need to follow these instructions:
 
 ```
 git clone https://github.com/wmbutler/couchbackup.git
