@@ -113,7 +113,7 @@ This is a newly developed feature and is in extreme alpha stage. if you pass the
 - If you lose the incremental log file containing the list of `seq`, you will have no choice but to start over with a full backup. This file needs to be present every time. It is automatically created for you on the first run.
 - The first time you run with the `--incremental` flag, we will do a full backup and append the backup log with `_0`.
 - Must use the `--output` flag instead of `STDOUT` to save the file since we need control to name it with the sequence.
-- Subsequent log files will increment _1, _2, _3 as you might expect.
+- Subsequent backup log files will increment _1, _2, _3 as you might expect.
 - Set any frequency you like. All that matters on restore is that you respect the sequence of the log files.
 - You will not require the incremental log file for the restore since it doesn't actually store any of your data.
 - Restore operation for these files has not been built but it shoould be fairly easy to script the restore of each file in sequence.
