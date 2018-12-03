@@ -123,7 +123,7 @@ This is a newly developed feature and is in extreme alpha stage. if you pass the
 This isn't an NPM module yet so you will need to clone the githib repo, then:
 
 ```
-git clone https://github.com/cloudant/couchbackup.git
+git clone https://github.com/wmbutler/couchbackup.git
 cd couchbackup
 npm install
 cd bin
