@@ -54,6 +54,7 @@ module.exports = function(db, options) {
         since = lines[lines.length-2];
           spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err) {
             if (err) {
+              fs.appendFileSync('memerror.txt', JSON.stringify(err));
               ee.emit('error', err);
             } else {
               downloadRemainingBatches(options.log, db, ee, start, batchesPerDownloadSession, options.parallelism);
