@@ -96,6 +96,7 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
             } else {
               debug('finished streaming database changes');
               if (incrementalLog && lastSeq != since) {
+                // Once _changes are logged, save the lastSeq in incrementalLog
                 fs.appendFileSync(incrementalLog, lastSeq + '\n');
               }
             logStream.end(':changes_complete ' + lastSeq + '\n', 'utf8', callback);
