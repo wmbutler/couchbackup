@@ -40,7 +40,7 @@ module.exports = function(db, options) {
   const batchesPerDownloadSession = 50; // max batches to read from log file for download at a time (prevent OOM)
 
   function proceedWithBackup() {
-    var since = undefined;
+    // var since = undefined;
     if (options.resume) {
       // pick up from existing log file from previous run
       downloadRemainingBatches(options.log, db, ee, start, batchesPerDownloadSession, options.parallelism);
@@ -62,7 +62,7 @@ module.exports = function(db, options) {
           });
       } else {
       // create new log file and process
-      spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err) {
+      spoolchanges(db, options.log, options.bufferSize, ee, function(err) {
         if (err) {
           ee.emit('error', err);
         } else {

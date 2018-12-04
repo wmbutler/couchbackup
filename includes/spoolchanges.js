@@ -29,7 +29,7 @@ const debug = require('debug')('couchbackup:spoolchanges');
  * @param {string} incrementalLog - path of the incremental log file to use
  * @param {function(err)} callback - a callback to run on completion
  */
-module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callback) {
+module.exports = function(db, log, bufferSize, ee, callback) {
   // list of document ids to process
   var buffer = [];
   var batch = 0;
@@ -39,7 +39,7 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
   };
 
   // if we are handlimg incremental backups respect the since value
-  if ( incrementalLog && since ){ changesOpts['since'] = since; }
+  // if ( incrementalLog && since ){ changesOpts['since'] = since; }
     
   var logStream = fs.createWriteStream(log);
 
@@ -82,7 +82,6 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
         changesRequest.abort();
         callback(error.convertResponseError(resp));
       } else {
-        debug('we have response!');
         changesRequest.pipe(liner())
           .on('error', function(err) {
             callback(err);
@@ -92,7 +91,6 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
             callback(err);
           })
           .on('finish', function() {
-            debug('Finish is true, calling processBuffer(true)');
             processBuffer(true);
             if (!lastSeq) {
               logStream.end();
@@ -100,10 +98,10 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
               callback(new error.BackupError('SpoolChangesError', `Changes request terminated before last_seq was sent`));
             } else {
               debug('finished streaming database changes');
-              if (incrementalLog && lastSeq != since) {
-                // Once _changes are logged, save the lastSeq in incrementalLog
-                fs.appendFileSync(incrementalLog, lastSeq + '\n');
-              }
+              // if (incrementalLog && lastSeq != since) {
+              //   // Once _changes are logged, save the lastSeq in incrementalLog
+              //   fs.appendFileSync(incrementalLog, lastSeq + '\n');
+              // }
             logStream.end(':changes_complete ' + lastSeq + '\n', 'utf8', callback);
             }
           });
