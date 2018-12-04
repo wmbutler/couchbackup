@@ -64,8 +64,8 @@ return couchbackup.backup(
   ws,
   opts,
   error.terminationCallback
-).on('changes', function(batch) {
-  debug('Total batches received:', batch + 1);
+).on('changes', function(batch, lastOne) {
+  debug('Total batches received:', batch + 1, lastOne);
 }).on('written', function(obj) {
   debug('Written batch ID:', obj.batch, 'Total document revisions written:', obj.total, 'Time:', obj.time);
 }).on('error', function(e) {
