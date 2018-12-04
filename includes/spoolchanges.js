@@ -80,6 +80,7 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
         changesRequest.abort();
         callback(error.convertResponseError(resp));
       } else {
+        debug('we have response!');
         changesRequest.pipe(liner())
           .on('error', function(err) {
             callback(err);
