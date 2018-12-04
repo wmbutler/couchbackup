@@ -46,13 +46,12 @@ module.exports = function(db, options) {
       downloadRemainingBatches(options.log, db, ee, start, batchesPerDownloadSession, options.parallelism);
     } else if (options.incrementalLog) {
         // create incrementLog if it does not exist
-        fs.readFile(options.incrementalLog, { encoding: 'utf-8', flag: 'a+' }, (err, data) => {
-          if (err) throw err;
-          // get number of lines in incremental file
-          var lines = data.split("\n");
-          // since represents the last known incremental revision (last_seq)
-          since = lines[lines.length-2];
-          // create new log file and process
+        if (!fs.existsSync(options.incrementalLog)) {
+          fs.writeFileSync(options.incrementalLog);
+        }
+        var lines = fs.readFileSync(options.incrementalLog, { encoding: 'utf-8' }).split("\n");
+        // get the last value from incrementalLog
+        since = lines[lines.length-2];
           spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err) {
             if (err) {
               ee.emit('error', err);
@@ -60,7 +59,6 @@ module.exports = function(db, options) {
               downloadRemainingBatches(options.log, db, ee, start, batchesPerDownloadSession, options.parallelism);
             }
           });
-        });
       } else {
       // create new log file and process
       spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err) {
