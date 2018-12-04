@@ -45,7 +45,7 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
 
   // send documents ids to the queue in batches of bufferSize + the last batch
   var processBuffer = function(lastOne) {
-    debug('first line of processBuffer', lastOne);
+    console.error('first line of processBuffer', lastOne);
     if (buffer.length >= bufferSize || (lastOne && buffer.length > 0)) {
       debug('writing', buffer.length, 'changes to the backup file');
       var b = { docs: buffer.splice(0, bufferSize), batch: batch };
