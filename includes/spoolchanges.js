@@ -69,7 +69,7 @@ module.exports = function(db, log, bufferSize, ee, incrementalLog, since, callba
   };
 
   // stream the changes feed to disk
-  var changesRequest = db.changesAsStream(changesOpts)
+  var changesRequest = db.changes(changesOpts)
     .on('error', function(err) {
       callback(new error.BackupError('SpoolChangesError', `Failed changes request - ${err.message}`));
     })
