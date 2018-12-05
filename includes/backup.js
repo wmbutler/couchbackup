@@ -62,7 +62,7 @@ module.exports = function(db, options) {
         });
     } else {
       // create new log file and process
-      spoolchanges(db, options.log, options.bufferSize, ee, function(err) {
+      spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err) {
         if (err) {
           ee.emit('error', err);
         } else {
