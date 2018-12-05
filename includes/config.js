@@ -102,11 +102,6 @@ function applyEnvironmentVariables(opts) {
     opts.iamTokenUrl = process.env.CLOUDANT_IAM_TOKEN_URL;
   }
 
-  // if we are given an incremental count
-  if (typeof process.env.COUCH_INCREMENTAL_COUNT !== 'undefined') {
-    opts.incrementalCount = path.normalize(process.env.COUCH_INCREMENTAL_COUNT);
-  }
-
   // if we are given an incremental log file
   if (typeof process.env.COUCH_INCREMENTAL_LOG !== 'undefined') {
     opts.incrementalLog = path.normalize(process.env.COUCH_INCREMENTAL_LOG);
