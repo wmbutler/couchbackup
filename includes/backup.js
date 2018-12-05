@@ -47,7 +47,7 @@ module.exports = function(db, options) {
     } else if (options.incrementalLog) {
       // create incrementLog if it does not exist
       if (!fs.existsSync(options.incrementalLog)) {
-        fs.writeFileSync(options.incrementalLog);
+        fs.writeFileSync(options.incrementalLog, '');
       }
       var lines = fs.readFileSync(options.incrementalLog, { encoding: 'utf-8' }).split("\n");
       // get the last value from incrementalLog
