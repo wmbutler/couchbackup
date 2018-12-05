@@ -32,7 +32,9 @@ var opts = {
   parallelism: program.parallelism,
   resume: program.resume,
   iamApiKey: program.iamApiKey,
-  iamTokenUrl: program.iamTokenUrl
+  iamTokenUrl: program.iamTokenUrl,
+  incrementalLog: program.incrementalLog,
+  output: program.output
 };
 
 // log configuration to console
@@ -60,12 +62,26 @@ return couchbackup.backup(
   ws,
   opts,
   error.terminationCallback
-).on('changes', function(batch) {
-  debug('Total batches received:', batch + 1);
+).on('changes', function(batch, lastOne) {
+  debug('Total batches received:', batch + 1);	  debug('Total batches received:', batch + 1, lastOne);
 }).on('written', function(obj) {
   debug('Written batch ID:', obj.batch, 'Total document revisions written:', obj.total, 'Time:', obj.time);
 }).on('error', function(e) {
   debug('ERROR', e);
 }).on('finished', function(obj) {
+  if (opts.incrementalLog && obj.total == 0) {
+    debug('Incremental backup contained 0 records');
+    fs.unlinkSync(opts.log);
+    fs.unlinkSync(opts.output);
+  }
+  if (opts.incrementalLog && obj.total > 0) {
+    fs.readFile(opts.incrementalLog, { encoding: 'utf-8', flag: 'a+' }, (err, data) => {
+      var lines = data.split("\n");
+      var part = lines.length - 2;
+      fs.renameSync(opts.log, opts.log.split('.')[0] + '_' + part + '.' + opts.log.split('.')[1]);
+      fs.renameSync(opts.output, opts.output.split('.')[0] + '_' + part + '.' + opts.output.split('.')[1]);
+      debug('Incremental backup_' + part + ' written');
+    });
+  }
   debug('Finished - Total document revisions written:', obj.total);
 });

@@ -97,6 +97,11 @@ function applyEnvironmentVariables(opts) {
   }
 }
 
+  // if we are given an incremental log file
+  if (typeof process.env.COUCH_INCREMENTAL_LOG !== 'undefined') {
+    opts.incrementalLog = path.normalize(process.env.COUCH_INCREMENTAL_LOG);
+  }
+  
 module.exports = {
   apiDefaults: apiDefaults,
   cliDefaults: cliDefaults,

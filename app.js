@@ -72,6 +72,10 @@ function validateArgs(url, opts, cb) {
     cb(new error.BackupError('InvalidOption', 'Invalid log option, must be type string'), null);
     return;
   }
+  if (opts && typeof opts.incrementalLog !== 'undefined' && typeof opts.incrementalLog !== 'string') {
+    cb(new error.BackupError('InvalidOption', 'Invalid incrementalLog option, must be type string'), null);
+    return;
+  }
   if (opts && typeof opts.mode !== 'undefined' && ['full', 'shallow'].indexOf(opts.mode) === -1) {
     cb(new error.BackupError('InvalidOption', 'Invalid mode option, must be either "full" or "shallow"'), null);
     return;

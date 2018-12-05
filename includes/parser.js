@@ -56,6 +56,9 @@ function parseBackupArgs() {
     .option('-u, --url <url>',
       cliutils.getUsage('URL of the CouchDB/Cloudant server', defaults.url),
       defaults.url)
+    .option('-i, --incremental-log <file>',
+    cliutils.getUsage('file to store the last_seq values to maintain incremental log integrity, must also specify --output if you use this flag', defaults.incrementalLog),
+      defaults.incrementalLog) 
     .parse(process.argv);
 
   // Special case the iamTokenUrl which is only an env var
@@ -66,7 +69,15 @@ function parseBackupArgs() {
     // We have to do this check here for the CLI case because of the default.
     error.terminationCallback(new error.BackupError('NoLogFileName', 'To resume a backup, a log file must be specified'));
   }
-
+    // Incremental backups need access to the outpufile in order to create the filename sequence
+    if (program.incrementalLog && (!program.output || program.mode == "shallow")) {
+    error.terminationCallback(new error.BackupError('NoOutputFile', 'To use incremental backups, output file must be specified with --output flag and --mode shallow cannot be used'));
+  }
+    // shallow mode is incompatible with buffersize and parallelism
+    if ((program.bufferSize || program.parallelism) && program.mode == "sahllow" ) {
+    error.terminationCallback(new error.BackupError('ShallowMode', '--buffer-size and --parallelism flags do nothing in --mode shallow'));
+  }
+  
   return program;
 }
 

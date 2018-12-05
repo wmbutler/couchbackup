@@ -40,9 +40,26 @@ module.exports = function(db, options) {
   const batchesPerDownloadSession = 50; // max batches to read from log file for download at a time (prevent OOM)
 
   function proceedWithBackup() {
+    // var since = undefined;
     if (options.resume) {
       // pick up from existing log file from previous run
       downloadRemainingBatches(options.log, db, ee, start, batchesPerDownloadSession, options.parallelism);
+    } else if (options.incrementalLog) {
+      // create incrementLog if it does not exist
+      if (!fs.existsSync(options.incrementalLog)) {
+        fs.writeFileSync(options.incrementalLog);
+      }
+      var lines = fs.readFileSync(options.incrementalLog, { encoding: 'utf-8' }).split("\n");
+      // get the last value from incrementalLog
+      since = lines[lines.length-2];
+        spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err) {
+          if (err) {
+            fs.appendFileSync('memerror.txt', JSON.stringify(err));
+            ee.emit('error', err);
+          } else {
+            downloadRemainingBatches(options.log, db, ee, start, batchesPerDownloadSession, options.parallelism);
+          }
+        });
     } else {
       // create new log file and process
       spoolchanges(db, options.log, options.bufferSize, ee, function(err) {

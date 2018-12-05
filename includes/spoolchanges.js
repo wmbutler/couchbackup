@@ -26,6 +26,7 @@ const debug = require('debug')('couchbackup:spoolchanges');
  * @param {string} dbUrl - URL of database
  * @param {string} log - path to log file to use
  * @param {number} bufferSize - the number of changes per batch/log line
+ * @param {string} incrementalLog - path of the incremental log file to use
  * @param {function(err)} callback - a callback to run on completion
  */
 module.exports = function(db, log, bufferSize, ee, callback) {
@@ -33,6 +34,12 @@ module.exports = function(db, log, bufferSize, ee, callback) {
   var buffer = [];
   var batch = 0;
   var lastSeq = null;
+  var changesOpts = {
+    seq_interval: 10000
+  };
+   // if we are handlimg incremental backups respect the since value
+  // if ( incrementalLog && since ){ changesOpts['since'] = since; }
+    
   var logStream = fs.createWriteStream(log);
 
   // send documents ids to the queue in batches of bufferSize + the last batch
@@ -62,7 +69,7 @@ module.exports = function(db, log, bufferSize, ee, callback) {
   };
 
   // stream the changes feed to disk
-  var changesRequest = db.changes({ seq_interval: 10000 })
+  var changesRequest = db.changesAsStream(changesOpts)
     .on('error', function(err) {
       callback(new error.BackupError('SpoolChangesError', `Failed changes request - ${err.message}`));
     })
@@ -87,6 +94,10 @@ module.exports = function(db, log, bufferSize, ee, callback) {
               callback(new error.BackupError('SpoolChangesError', `Changes request terminated before last_seq was sent`));
             } else {
               debug('finished streaming database changes');
+              // if (incrementalLog && lastSeq != since) {
+              //   // Once _changes are logged, save the lastSeq in incrementalLog
+              //   fs.appendFileSync(incrementalLog, lastSeq + '\n');
+              // }
               logStream.end(':changes_complete ' + lastSeq + '\n', 'utf8', callback);
             }
           });
