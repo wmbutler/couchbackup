@@ -20,6 +20,7 @@ const error = require('./error.js');
 const spoolchanges = require('./spoolchanges.js');
 const logfilesummary = require('./logfilesummary.js');
 const logfilegetbatches = require('./logfilegetbatches.js');
+let incrementalLog = null;
 
 /**
  * Read documents from a database to be backed up.
@@ -38,21 +39,22 @@ module.exports = function(db, options) {
   const ee = new events.EventEmitter();
   const start = new Date().getTime(); // backup start time
   const batchesPerDownloadSession = 50; // max batches to read from log file for download at a time (prevent OOM)
+  incrementalLog = options.incrementalLog;
 
   function proceedWithBackup() {
     var since = undefined;
     if (options.resume) {
       // pick up from existing log file from previous run
       downloadRemainingBatches(options.log, db, ee, start, batchesPerDownloadSession, options.parallelism, null);
-    } else if (options.incrementalLog) {
+    } else if (incrementalLog) {
       // create incrementLog if it does not exist
-      if (!fs.existsSync(options.incrementalLog)) {
-        fs.writeFileSync(options.incrementalLog, '');
+      if (!fs.existsSync(incrementalLog)) {
+        fs.writeFileSync(incrementalLog, '');
       }
-      var lines = fs.readFileSync(options.incrementalLog, { encoding: 'utf-8' }).split("\n");
+      var lines = fs.readFileSync(incrementalLog, { encoding: 'utf-8' }).split("\n");
       // get the last value from incrementalLog
       since = lines[lines.length-2];
-        spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err, lastSeq) {
+        spoolchanges(db, options.log, options.bufferSize, ee, incrementalLog, since, function(err, lastSeq) {
           if (err) {
             fs.appendFileSync('memerror.txt', JSON.stringify(err));
             ee.emit('error', err);
@@ -62,7 +64,7 @@ module.exports = function(db, options) {
         });
     } else {
       // create new log file and process
-      spoolchanges(db, options.log, options.bufferSize, ee, options.incrementalLog, since, function(err) {
+      spoolchanges(db, options.log, options.bufferSize, ee, incrementalLog, since, function(err) {
         if (err) {
           ee.emit('error', err);
         } else {
@@ -164,7 +166,7 @@ function downloadRemainingBatches(log, db, ee, startTime, batchesPerDownloadSess
 
   function onComplete() {
     // Append to incrementalLog if lastSeq exists
-    if (lastSeq) { fs.appendFileSync(options.incrementalLog, lastSeq + '\n'); }
+    if (lastSeq) { fs.appendFileSync(incrementalLog, lastSeq + '\n'); }
     ee.emit('finished', {total: total});
   }
 
